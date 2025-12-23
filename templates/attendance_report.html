@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Attendance Report{% endblock %}
+
+{% block content %}
+<h1 class="mb-3">Attendance Report</h1>
+
+<form method="get" class="row g-3 mb-4">
+    <div class="col-auto">
+        <input type="date" name="date" value="{{ selected_date }}" class="form-control">
+    </div>
+    <div class="col-auto">
+        <button class="btn btn-primary">View</button>
+    </div>
+</form>
+
+<div class="card">
+    <div class="card-body">
+        <h5 class="card-title">Report for {{ selected_date }}</h5>
+        <p>Total Students: <strong>{{ total_students }}</strong></p>
+        <p>Present: <strong class="text-success">{{ present }}</strong></p>
+        <p>Absent: <strong class="text-danger">{{ absent }}</strong></p>
+    </div>
+</div>
+{% endblock %}

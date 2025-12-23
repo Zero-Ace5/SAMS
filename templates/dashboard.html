@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h1 class="mb-3">Dashboard</h1>
+
+<p class="text-muted">
+    Attendance Summary for <strong>{{ attendance_date }}</strong>
+</p>
+
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card shadow-sm text-center">
+            <div class="card-body">
+                <h6 class="text-muted">Total Students</h6>
+                <h2 class="fw-bold">{{ total_students }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm text-center border-success">
+            <div class="card-body">
+                <h6 class="text-success">Present</h6>
+                <h2 class="fw-bold text-success">{{ present }}</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm text-center border-danger">
+            <div class="card-body">
+                <h6 class="text-danger">Absent</h6>
+                <h2 class="fw-bold text-danger">{{ absent }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="d-flex flex-wrap gap-2">
+    <a href="/students/" class="btn btn-primary">
+        View Students
+    </a>
+    <a href="/attendance/mark/" class="btn btn-success">
+        Mark Attendance
+    </a>
+    <a href="/attendance/" class="btn btn-secondary">
+        Check Attendance
+    </a>
+    <a href="/attendance/report/" class="btn btn-outline-dark">
+        Attendance Report
+    </a>
+</div>
+{% endblock %}

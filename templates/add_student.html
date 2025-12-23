@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Add Student{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Add Student</h1>
+
+{% if errors %}
+<div class="alert alert-danger">
+    <ul class="mb-0">
+        {% for field, msgs in errors.items %}
+        <li><strong>{{ field }}:</strong> {{ msgs|join:", " }}</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endif %}
+
+<form method="post" class="card p-4 shadow-sm">
+    {% csrf_token %}
+
+    <div class="mb-3">
+        <label class="form-label">Name</label>
+        <input type="text" name="name" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Roll Number</label>
+        <input type="text" name="roll_no" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Class</label>
+        <input type="text" name="s_class" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" name="email" class="form-control" required>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-success">
+            Add Student
+        </button>
+        <a href="/students/" class="btn btn-secondary">
+            Cancel
+        </a>
+    </div>
+</form>
+{% endblock %}
