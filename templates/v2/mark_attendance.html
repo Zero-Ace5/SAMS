@@ -1,0 +1,94 @@
+{% extends "v2/base2.html" %}
+
+{% block content %}
+<h1 id="title"></h1>
+
+<form id="attendance-form">
+    <input type="hidden" id="csrf-token" value="{{ csrf_token }}">
+
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Name</th>
+                <th>Roll</th>
+                <th>Present</th>
+            </tr>
+        </thead>
+        <tbody id="attendance-body"></tbody>
+    </table>
+
+    <button class="btn btn-success" type="submit">
+        Save Attendance
+    </button>
+</form>
+
+<script>
+    const today = new Date().toISOString().slice(0, 10);
+    document.getElementById("title").innerText =
+        `Mark Attendance (${today})`;
+
+    const body = document.getElementById("attendance-body");
+
+    async function loadAttendance() {
+        const students = await fetch("/api/v2/students/").then(r => r.json());
+        const attendance = await fetch(`/api/v2/attendance/?date=${today}`)
+            .then(r => r.json());
+
+        const attendanceMap = {};
+        attendance.forEach(a => {
+            attendanceMap[a.student.id] = a.present;
+        });
+
+        body.innerHTML = "";
+
+        students.forEach(s => {
+            const checked = attendanceMap[s.id] ? "checked" : "";
+
+            body.innerHTML += `
+        <tr>
+            <td>${s.name}</td>
+            <td>${s.roll_no}</td>
+            <td class="text-center">
+                <input type="checkbox"
+                       data-student="${s.id}"
+                       ${checked}>
+            </td>
+        </tr>
+        `;
+        });
+    }
+
+    document.getElementById("attendance-form")
+        .addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const records = [];
+            document.querySelectorAll("input[data-student]")
+                .forEach(cb => {
+                    records.push({
+                        student: cb.dataset.student,
+                        present: cb.checked
+                    });
+                });
+
+            const csrfToken = document.getElementById("csrf-token").value;
+
+            await fetch("/api/v2/attendance/", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": csrfToken
+                },
+                body: JSON.stringify({
+                    date: today,
+                    records: records
+                })
+            });
+
+            alert("Attendance saved");
+        });
+
+    loadAttendance();
+</script>
+
+{% endblock %}

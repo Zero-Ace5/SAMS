@@ -1,0 +1,19 @@
+python manage.py shell
+
+from school_v2.models import Student
+Student.objects.create(
+    name="Test Student",
+    roll_no="T001",
+    s_class="10A",
+    email="test@example.com"
+)
+
+from school_v2.models import Student, Attendance
+
+student = Student.objects.get(roll_no="T001")
+
+Attendance.objects.create(
+    student=student,
+    date="2025-12-23",
+    present=True
+)

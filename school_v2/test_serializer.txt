@@ -1,0 +1,10 @@
+python manage.py shell
+
+from school_v2.models import Student, Attendance
+from school_v2.serializers import StudentSerializer, AttendanceSerializer
+
+student = Student.objects.first()
+StudentSerializer(student).data
+
+att = Attendance.objects.first()
+AttendanceSerializer(att).data

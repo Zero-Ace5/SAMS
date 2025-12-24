@@ -1,0 +1,48 @@
+{% extends "v2/base2.html" %}
+
+{% block content %}
+<h1>Dashboard</h1>
+
+<p id="date-label"></p>
+
+<div class="row">
+    <div class="col">
+        <h4>Total Students</h4>
+        <h2 id="total-students">–</h2>
+    </div>
+    <div class="col text-success">
+        <h4>Present</h4>
+        <h2 id="present-count">–</h2>
+    </div>
+    <div class="col text-danger">
+        <h4>Absent</h4>
+        <h2 id="absent-count">–</h2>
+    </div>
+</div>
+
+<script>
+    console.log("Dashboard v2 JS loaded");
+
+    const today = new Date().toISOString().slice(0, 10);
+    document.getElementById("date-label").innerText =
+        `Attendance Summary for ${today}`;
+
+    async function loadDashboard() {
+        const studentsRes = await fetch("/api/v2/students/");
+        const attendanceRes = await fetch(`/api/v2/attendance/?date=${today}`);
+
+        const students = await studentsRes.json();
+        const attendance = await attendanceRes.json();
+
+        const presentCount = attendance.filter(a => a.present).length;
+        const totalStudents = students.length;
+        const absentCount = totalStudents - presentCount;
+
+        document.getElementById("total-students").innerText = totalStudents;
+        document.getElementById("present-count").innerText = presentCount;
+        document.getElementById("absent-count").innerText = absentCount;
+    }
+
+    loadDashboard();
+</script>
+{% endblock %}

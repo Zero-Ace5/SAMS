@@ -23,17 +23,17 @@
     const dateInput = document.getElementById("date-picker");
     const body = document.getElementById("attendance-body");
 
-    // default = today
+    // set today by default
     const today = new Date().toISOString().slice(0, 10);
     dateInput.value = today;
 
     async function loadAttendance(date) {
-        const attendance = await fetch(`/api/v2/attendance/?date=${date}`)
-            .then(r => r.json());
+        const res = await fetch(`/api/v2/attendance/?date=${date}`);
+        const data = await res.json();
 
         body.innerHTML = "";
 
-        if (attendance.length === 0) {
+        if (data.length === 0) {
             body.innerHTML = `
             <tr>
                 <td colspan="3" class="text-center text-muted">
@@ -44,11 +44,11 @@
             return;
         }
 
-        attendance.forEach(a => {
+        data.forEach(a => {
             body.innerHTML += `
             <tr>
-                <td>${a.student.name}</td>
-                <td>${a.student.roll_no}</td>
+                <td>${a.student_name}</td>
+                <td>${a.student_roll}</td>
                 <td class="${a.present ? 'text-success' : 'text-danger'}">
                     ${a.present ? 'Present' : 'Absent'}
                 </td>
