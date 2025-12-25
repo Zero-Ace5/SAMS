@@ -21,3 +21,11 @@ def attendance_report(request):
 
 def attendance_list(request):
     return render(request, "v2/attendance_list.html")
+
+
+def student_edit(request, pk):
+    return render(request, "v2/student_edit.html")
+
+
+def student_add(request):
+    return render(request, "v2/add_student.html")

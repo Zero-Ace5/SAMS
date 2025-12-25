@@ -1,0 +1,47 @@
+{% extends "v2/base2.html" %}
+
+{% block content %}
+<h1>Attendance Report</h1>
+
+<table class="table table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>Date</th>
+            <th>Present</th>
+            <th>Absent</th>
+        </tr>
+    </thead>
+    <tbody id="report-body"></tbody>
+</table>
+
+<script>
+    async function loadReport() {
+        const res = await fetch("/api/v2/attendance/report/");
+        const data = await res.json();
+
+        const body = document.getElementById("report-body");
+        body.innerHTML = "";
+
+        if (data.length === 0) {
+            body.innerHTML = `
+            <tr>
+                <td colspan="3" class="text-center text-muted">
+                    No attendance data
+                </td>
+            </tr>`;
+            return;
+        }
+
+        data.forEach(r => {
+            body.innerHTML += `
+        <tr>
+            <td>${r.date}</td>
+            <td class="text-success">${r.present}</td>
+            <td class="text-danger">${r.absent}</td>
+        </tr>`;
+        });
+    }
+
+    loadReport();
+</script>
+{% endblock %}

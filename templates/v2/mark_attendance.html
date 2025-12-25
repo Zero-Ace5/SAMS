@@ -36,7 +36,7 @@
 
         const attendanceMap = {};
         attendance.forEach(a => {
-            attendanceMap[a.student.id] = a.present;
+            attendanceMap[a.student] = a.present;
         });
 
         body.innerHTML = "";

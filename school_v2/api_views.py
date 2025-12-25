@@ -9,6 +9,8 @@ from django.shortcuts import get_object_or_404
 from .models import Student, Attendance
 from .serializers import StudentSerializer, AttendanceSerializer
 
+from django.db.models import Count, Q
+
 
 class StudentListCreateAPI(APIView):
     def get(self, request):
@@ -39,7 +41,7 @@ class StudentDetailAPI(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, requesr, pk):
+    def delete(self, request, pk):
         student = get_object_or_404(Student, pk=pk)
         student.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -62,7 +64,7 @@ class AttendanceAPI(APIView):
         if not date_value or not isinstance(records, list):
             return Response(
                 {"error": "Invalid Data Entered"},
-                status=status.HTTP_404_NOT_FOUND,
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         saved = []
@@ -72,7 +74,7 @@ class AttendanceAPI(APIView):
                 student_id = item.get("student")
                 present = item.get("present", True)
 
-                student = Student.objects.get(pk=student_id)
+                student = get_object_or_404(Student, pk=student_id)
 
                 attendance, _ = Attendance.objects.update_or_create(
                     student=student,
@@ -84,3 +86,24 @@ class AttendanceAPI(APIView):
 
         serializer = AttendanceSerializer(saved, many=True)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+
+class AttendanceReportAPI(APIView):
+    def get(self, request):
+        total_students = Student.objects.count()
+
+        report = (
+            Attendance.objects.values("date").annotate(
+                present=Count("id", filter=Q(present=True)),).order_by("-date")
+        )
+
+        result = []
+
+        for r in report:
+            result.append({
+                "date": r["date"],
+                "present": r["present"],
+                "absent": total_students - r["present"],
+            })
+
+        return Response(result)

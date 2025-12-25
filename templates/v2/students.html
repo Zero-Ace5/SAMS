@@ -1,0 +1,70 @@
+{% extends "v2/base2.html" %}
+
+{% block content %}
+<h1>Students</h1>
+<a href="add/" class="btn btn-success mb-3">
+    + Add Student
+</a>
+
+<table class="table table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>Name</th>
+            <th>Roll</th>
+            <th>Class</th>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody id="student-body"></tbody>
+</table>
+<input type="hidden" id="csrf-token" value="{{ csrf_token }}">
+<script>
+    async function loadStudents() {
+        const res = await fetch("/api/v2/students/");
+        const students = await res.json();
+
+        const body = document.getElementById("student-body");
+        body.innerHTML = "";
+
+        students.forEach(s => {
+            body.innerHTML += `
+            <tr>
+                <td>${s.name}</td>
+                <td>${s.roll_no}</td>
+                <td>${s.s_class}</td>
+                <td>${s.email}</td>
+                <td>
+                    <button class="btn btn-danger btn-sm"
+                            onclick="deleteStudent(${s.id})">
+                        Delete
+                    </button>
+                    <button class="btn btn-warning btn-sm"
+                            onclick="location.href='/v2/students/${s.id}/edit/'">
+                        Edit
+                    </button>
+                </td>
+            </tr>`;
+        });
+    }
+
+    async function deleteStudent(id) {
+        if (!confirm("Delete student?")) return;
+
+        const csrfToken = document.getElementById("csrf-token").value;
+
+        await fetch(`/api/v2/students/${id}/`, {
+            method: "DELETE",
+            headers: {
+                "X-CSRFToken": csrfToken
+            }
+        });
+
+        loadStudents();
+    }
+    loadStudents();
+</script>
+
+
+</script>
+{% endblock %}
