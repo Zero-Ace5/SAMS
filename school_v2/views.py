@@ -29,3 +29,7 @@ def student_edit(request, pk):
 
 def student_add(request):
     return render(request, "v2/add_student.html")
+
+
+def student_attendance_page(request):
+    return render(request, "v2/student_attendance.html")

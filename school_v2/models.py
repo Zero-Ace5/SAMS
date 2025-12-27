@@ -20,6 +20,9 @@ class Attendance(models.Model):
 
     class Meta:
         unique_together = ("student", "date")
+        indexes = [
+            models.Index(fields=["date"])
+        ]
 
     def __str__(self):
         return f"{self.student} ({self.date})"

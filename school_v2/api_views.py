@@ -11,17 +11,35 @@ from .serializers import StudentSerializer, AttendanceSerializer
 
 from django.db.models import Count, Q
 
+from django.core.cache import cache  # Added Cache
+
+import os
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class StudentListCreateAPI(APIView):
     def get(self, request):
-        students = Student.objects.all()
-        serializer = StudentSerializer(students, many=True)
-        return Response(serializer.data)
+        cache_key = "student:list"
+        data = cache.get(cache_key)
+
+        if data is None:
+            logger.warning("CACHE MISS → DB QUERY - 1")
+            students = Student.objects.all()
+            data = StudentSerializer(students, many=True).data
+            cache.set(cache_key, data, 600)
+        else:
+            logger.warning("CACHE HIT - 1")
+
+        return Response(data)
 
     def post(self, request):
         serializer = StudentSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+            # This line below will invalidate a existing cache on every new record addition
+            cache.delete("student:list")
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -81,10 +99,14 @@ class AttendanceAPI(APIView):
                     date=date_value,
                     defaults={"present": present},
                 )
-
+                # cache invalidation for the StudentAttendanceAPI
+                cache.delete(f"attendance:student:{student.id}")
+                # cache.delete_pattern("attendance:student:*")
                 saved.append(attendance)
 
+        cache.delete("student:list")
         serializer = AttendanceSerializer(saved, many=True)
+        # print("PID:", os.getpid())
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
@@ -107,3 +129,26 @@ class AttendanceReportAPI(APIView):
             })
 
         return Response(result)
+
+
+# API for the new Student module for them to read
+class StudentAttendanceAPI(APIView):
+    def get(self, request, student_id):
+        cache_key = f"attendance:student:{student_id}"
+        data = cache.get(cache_key)
+
+        if data is None:
+            logger.warning("CACHE MISS → DB QUERY - 2")
+            records = (
+                Attendance.objects
+                .filter(student_id=student_id)
+                .values("date", "present")
+                .order_by("date")
+            )
+            data = list(records)
+            cache.set(cache_key, data, 600)
+        else:
+            logger.warning("CACHE HIT - 2")
+
+        # print("PID:", os.getpid())
+        return Response(data)

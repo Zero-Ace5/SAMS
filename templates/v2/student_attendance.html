@@ -1,0 +1,77 @@
+{% extends "v2/base2.html" %}
+
+{% block content %}
+<h1>My Attendance</h1>
+
+<div class="mb-3">
+    <label class="form-label">Enter Roll No</label>
+    <div class="input-group" style="max-width: 300px;">
+        <input type="text" id="roll-no" class="form-control" placeholder="e.g. A12">
+        <button class="btn btn-primary" onclick="loadAttendance()">View</button>
+    </div>
+</div>
+
+<table class="table table-bordered">
+    <thead class="table-dark">
+        <tr>
+            <th>Date</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody id="attendance-body"></tbody>
+</table>
+
+<script>
+    async function loadAttendance() {
+        const rollNo = document.getElementById("roll-no").value.trim();
+        if (!rollNo) {
+            alert("Enter Roll No");
+            return;
+        }
+
+        // 1️⃣ Get all students (cached on server side)
+        const studentsRes = await fetch("/api/v2/students/");
+        const students = await studentsRes.json();
+
+        // 2️⃣ Find matching student
+        const student = students.find(s => s.roll_no === rollNo);
+        if (!student) {
+            alert("Invalid Roll No");
+            return;
+        }
+
+        const studentId = student.id;
+
+        // 3️⃣ Fetch attendance (cached per student)
+        const res = await fetch(`/api/v2/student/${studentId}/attendance/`);
+        const records = await res.json();
+
+        const body = document.getElementById("attendance-body");
+        body.innerHTML = "";
+
+        if (records.length === 0) {
+            body.innerHTML = `
+                <tr>
+                    <td colspan="2" class="text-center text-muted">
+                        No attendance records found
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        records.forEach(r => {
+            body.innerHTML += `
+                <tr>
+                    <td>${r.date}</td>
+                    <td>
+                        <span class="badge ${r.present ? 'bg-success' : 'bg-danger'}">
+                            ${r.present ? 'Present' : 'Absent'}
+                        </span>
+                    </td>
+                </tr>
+            `;
+        });
+    }
+</script>
+{% endblock %}
